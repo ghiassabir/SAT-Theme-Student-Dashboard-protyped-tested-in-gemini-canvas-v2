@@ -119,48 +119,11 @@ function setupEventListeners() {
 }
 
 async function loadAndDisplayData() {
-    // --- Future: Student ID Handling & Data Fetching ---
-    // const studentGmailId = "some_student@example.com"; // This would be determined dynamically
-
-    // console.log(`Attempting to load data for student: ${studentGmailId}`);
-    // try {
-    //     // --- Example for fetching AGGREGATED_SCORES_CSV_URL ---
-    //     // const aggregatedResponse = await fetch(AGGREGATED_SCORES_CSV_URL);
-    //     // if (!aggregatedResponse.ok) throw new Error(`Failed to fetch aggregated scores: ${aggregatedResponse.statusText}`);
-    //     // const aggregatedCsvText = await aggregatedResponse.text();
-    //     // const aggregatedData = Papa.parse(aggregatedCsvText, { header: true, skipEmptyLines: true }).data;
-        
-    //     // --- Example for fetching QUESTION_DETAILS_CSV_URL ---
-    //     // const questionResponse = await fetch(QUESTION_DETAILS_CSV_URL);
-    //     // if (!questionResponse.ok) throw new Error(`Failed to fetch question details: ${questionResponse.statusText}`);
-    //     // const questionCsvText = await questionResponse.text();
-    //     // const questionData = Papa.parse(questionCsvText, { header: true, skipEmptyLines: true }).data;
-
-    //     // --- Process and filter data for the specific student ---
-    //     // currentStudentData = processAndFilterDataForStudent(studentGmailId, aggregatedData, questionData);
-    //     // if (!currentStudentData) {
-    //     //     console.error(`No data found for student: ${studentGmailId}`);
-    //     //     // Display message to user: "No data available for this student."
-    //     //     return;
-    //     // }
-    //     console.log("Successfully fetched and processed CSV data (conceptual).");
-
-    // } catch (error) {
-    //     console.error("Error loading or parsing CSV data:", error);
-    //     // Display an error message on the dashboard to the user
-    //     // Fallback to dummy data if CSV loading fails for graceful degradation
-    //     alert("Could not load live student data. Displaying sample data instead.");
-    // }
-    // --- End Future Data Fetching ---
-
-
-    // For now, using the globally defined dummy currentStudentData
     document.getElementById('studentNameDisplay').textContent = `Welcome, ${currentStudentData.name}!`;
     populateOverviewSnapshot(currentStudentData); 
     populatePracticeTestsTable(currentStudentData.cbPracticeTests);
     
     ['reading', 'writing', 'math'].forEach(subject => {
-        // Ensure EOC chapters for the subject are fully populated if some are missing from currentStudentData
         const studentEOCs = currentStudentData.eocQuizzes[subject] || [];
         const allSubjectEOCs = (eocChapters[subject] || []).map(chapterName => {
             const existing = studentEOCs.find(e => e.name === chapterName);
@@ -170,19 +133,12 @@ async function loadAndDisplayData() {
         populateEOCTable(subject, allSubjectEOCs);
         populateKhanSection(subject, currentStudentData.khanAcademy[subject] || []);
         
-        // Similarly for CB Skills
         const studentCBSkills = currentStudentData.cbSkills[subject] || [];
-        // Assuming cbSkillsData is the master list of skills per subject if needed for structure
-        // For now, we directly use student's available skills.
         populateCBSkills(subject, studentCBSkills);
     });
 }
 
 function populateOverviewSnapshot(studentData) {
-    // Score cards are mostly hardcoded in HTML for this version for simplicity,
-    // but this function could update them if they had specific IDs.
-    // Example: document.getElementById('totalScoreValue').textContent = studentData.latestScores.total;
-    
     const overviewStrengths = document.querySelector('#overview-content ul:first-of-type'); 
     const overviewWeaknesses = document.querySelector('#overview-content ul:last-of-type'); 
     
@@ -234,7 +190,7 @@ function initializeOverviewCharts(studentData) {
         overallSkillChartInstance = new Chart(overallSkillCtx, { 
             type: 'bar', 
             data: { 
-                labels: studentData.overallSkillPerformance.labels, // Should be ['Reading', 'Writing & Language', 'Math']
+                labels: studentData.overallSkillPerformance.labels, 
                 datasets: [
                     { label: 'Your Accuracy', data: studentData.overallSkillPerformance.studentAccuracy, backgroundColor: barChartPrimaryBg },
                     { label: 'Class Average Accuracy', data: studentData.overallSkillPerformance.classAvgAccuracy, backgroundColor: barChartSecondaryBg }
@@ -338,22 +294,72 @@ function openModal(title, contentDetails) {
     if(modalHeaderH2) modalHeaderH2.textContent = title;
     
     modalQuestionDetailsContainer.innerHTML = ''; 
-    const dQ=[{text:"Solve for x: 2x + 5 = 15",yourAnswer:"x = 5",correct:true,classCorrectPercent:92,status:'answered'},{text:"Identify the main theme of paragraph 2.",yourAnswer:"Supporting detail A",correct:false,classCorrectPercent:75,status:'answered'},{text:"Which transition best connects these sentences?",yourAnswer:"Therefore",correct:true,classCorrectPercent:88,status:'answered'},{text:"What is the value of sin(30°)?",yourAnswer:"N/A",correct:false,classCorrectPercent:95,status:'unanswered'},{text:"A car travels 120 miles in 2 hours. What is its average speed?",yourAnswer:"50 mph",correct:false,classCorrectPercent:80,status:'answered'},{text:"What is the capital of Canada?",yourAnswer:"Ottawa",correct:true,classCorrectPercent:90,status:'answered'},]; 
-    dQ.forEach((q,i)=>{const d=document.createElement('div');let sT,sC;if(q.s==='unanswered'){sT='Unanswered';sC='bg-yellow-50 border-yellow-200 text-yellow-700';}else if(q.c){sT='Correct';sC='bg-green-50 border-green-200';}else{sT='Incorrect';sC='bg-red-50 border-red-200';}d.className=`p-2 border rounded-md ${sC}`;d.innerHTML=`<p class="font-medium text-gray-700">Q${i+1}: ${q.text}</p><p>Your Answer: <span class="font-semibold ${q.status==='unanswered'?'':(q.c?'text-good':'text-poor')}">${q.yA}</span> (${sT})</p><p class="text-xs text-gray-500">Class Avg Correctness: ${q.classCorrectPercent}% ${q.classCorrectPercent>80?'<span class="arrow-up">↑</span>':'<span class="arrow-down">↓</span>'}</p>`;modalQuestionDetailsContainer.appendChild(d);});
+    // Sample dummy questions for the modal
+    const dQ=[
+        {text:"Solve for x: 2x + 5 = 15",yourAnswer:"x = 5",correct:true,classCorrectPercent:92,status:'answered'},
+        {text:"Identify the main theme of paragraph 2.",yourAnswer:"Supporting detail A",correct:false,classCorrectPercent:75,status:'answered'},
+        {text:"Which transition best connects these sentences?",yourAnswer:"Therefore",correct:true,classCorrectPercent:88,status:'answered'},
+        {text:"What is the value of sin(30°)?",yourAnswer:"N/A",correct:false,classCorrectPercent:95,status:'unanswered'}, // Unanswered
+        {text:"A car travels 120 miles in 2 hours. What is its average speed?",yourAnswer:"50 mph",correct:false,classCorrectPercent:80,status:'answered'},
+        {text:"What is the capital of Canada?",yourAnswer:"Ottawa",correct:true,classCorrectPercent:90,status:'answered'},
+    ]; 
+    dQ.forEach((q,i)=>{
+        const d=document.createElement('div');
+        let sT='',sC='';
+        if(q.s==='unanswered'){sT='Unanswered';sC='bg-yellow-50 border-yellow-200 text-yellow-700';}
+        else if(q.c){sT='Correct';sC='bg-green-50 border-green-200';}
+        else{sT='Incorrect';sC='bg-red-50 border-red-200';}
+        d.className=`p-2 border rounded-md ${sC}`;
+        d.innerHTML=`<p class="font-medium text-gray-700">Q${i+1}: ${q.text}</p><p>Your Answer: <span class="font-semibold ${q.status==='unanswered'?'':(q.c?'text-good':'text-poor')}">${q.yA}</span> (${sT})</p><p class="text-xs text-gray-500">Class Avg Correctness: ${q.classCorrectPercent}% ${q.classCorrectPercent>80?'<span class="arrow-up">↑</span>':'<span class="arrow-down">↓</span>'}</p>`;
+        modalQuestionDetailsContainer.appendChild(d);
+    });
     
-    if(modalDonutChartInstance)modalDonutChartInstance.destroy();
-    if(modalLineChartInstance)modalLineChartInstance.destroy();
+    if(modalDonutChartInstance) modalDonutChartInstance.destroy();
+    if(modalLineChartInstance) modalLineChartInstance.destroy();
     
-    const cor=dQ.filter(q=>q.s==='answered'&&q.c).length;const inc=dQ.filter(q=>q.s==='answered'&&!q.c).length;const un=dQ.filter(q=>q.s==='unanswered').length;
+    const cor=dQ.filter(q=>q.s==='answered'&&q.c).length;
+    const inc=dQ.filter(q=>q.s==='answered'&&!q.c).length;
+    const un=dQ.filter(q=>q.s==='unanswered').length;
     
     const donutCtx = document.getElementById('modalDonutChart')?.getContext('2d');
-    if (donutCtx) {
-        modalDonutChartInstance=new Chart(donutCtx,{type:'doughnut',data:{labels:['Correct','Incorrect','Unanswered'],datasets:[{data:[cor,inc,un],backgroundColor:['#4caf50','#f44336','#9e9e9e'], hoverOffset: 4}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'bottom'}},cutout:'50%'}});
+    if (donutCtx) { // Check if context is successfully obtained
+        modalDonutChartInstance=new Chart(donutCtx,{
+            type:'doughnut',
+            data:{
+                labels:['Correct','Incorrect','Unanswered'],
+                datasets:[{
+                    data:[cor,inc,un],
+                    backgroundColor:['#4caf50','#f44336','#9e9e9e'], // Green, Red, Grey
+                    hoverOffset: 4
+                }]
+            },
+            options:{
+                responsive:true,
+                maintainAspectRatio:true, 
+                plugins:{ legend:{ position:'bottom' }},
+                cutout:'50%'
+            }
+        });
     }
 
     const lineCtx = document.getElementById('modalLineChart')?.getContext('2d');
-    if (lineCtx) {
-        modalLineChartInstance=new Chart(lineCtx,{type:'line',data:{labels:['A1','A2','A3','A4','A5'],datasets:[{label:'You',data:Array.from({length:5},()=>50+Math.random()*40),borderColor:'#2a5266',tension:0.1,fill:false},{label:'Class',data:Array.from({length:5},()=>45+Math.random()*35),borderColor:'#757575',borderDash:[5,5],tension:0.1,fill:false}]},options:{responsive:true,maintainAspectRatio:true,scales:{y:{beginAtZero:true,max:100}}}});
+    if (lineCtx) { // Check if context is successfully obtained
+        modalLineChartInstance=new Chart(lineCtx,{
+            type:'line',
+            data:{
+                labels:['Attempt 1','Attempt 2','Attempt 3','Attempt 4','Attempt 5'], // More descriptive labels
+                datasets:[
+                    {label:'You',data:Array.from({length:5},()=>50+Math.random()*40),borderColor:'#2a5266',tension:0.1,fill:false}, // SAT Hub Teal
+                    {label:'Class Average',data:Array.from({length:5},()=>45+Math.random()*35),borderColor:'#757575',borderDash:[5,5],tension:0.1,fill:false} // Grey
+                ]
+            },
+            options:{
+                responsive:true,
+                maintainAspectRatio:true,
+                scales:{y:{beginAtZero:true,max:100}},
+                plugins: { legend: {display: true, position: 'bottom'}}
+            }
+        });
     }
     if(modal) modal.style.display="block";
 }
